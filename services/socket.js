@@ -1,4 +1,5 @@
-const BASE_URL = "http://192.168.1.11:8000"; 
+// const BASE_URL = "http://192.168.1.7:8000"; 
+const BASE_URL = "https://list-apk-server.onrender.com"; 
 
 let socket = null;
 
