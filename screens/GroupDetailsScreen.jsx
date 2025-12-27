@@ -1,5 +1,5 @@
-import { View, FlatList, Image, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
-import { Text, Checkbox, TextInput, Button } from "react-native-paper";
+import { View, FlatList, Image, StyleSheet, KeyboardAvoidingView, Platform, Pressable  } from "react-native";
+import { Text, Checkbox, TextInput, Button, Dialog, Portal } from "react-native-paper";
 import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
@@ -18,7 +18,15 @@ export default function GroupDetailsScreen({ route }) {
   const [loadingItems, setLoadingItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
+  const [deleteItemId, setDeleteItemId] = useState(null);
   const ADMIN_EMAIL = "sachin8n@gmail.com";
+
+    useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [])
+  );
+
   const toggleCheck = async (item) => {
     if (user.email !== ADMIN_EMAIL) return;
 
@@ -79,11 +87,18 @@ export default function GroupDetailsScreen({ route }) {
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
+  const confirmDelete = async () => {
+    try {
+      await deleteItem(deleteItemId);
+      setDeleteItemId(null);
       load();
-    }, [])
-  );
+    } catch (err) {
+      console.log("DELETE ERROR:", err.message);
+      setDeleteItemId(null);
+    }
+  };
+  
+
 
   return (
     <KeyboardAvoidingView
@@ -106,56 +121,113 @@ export default function GroupDetailsScreen({ route }) {
           data={items}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ paddingBottom: 90 }}
+          // renderItem={({ item }) => (
+          //   <View style={styles.itemRow}>
+          //     <Checkbox
+          //       status={checkedItems[item.id] ? "checked" : "unchecked"}
+          //       disabled={user.email !== ADMIN_EMAIL}
+          //       onPress={() => toggleCheck(item)}
+          //     />
+          //     <Text
+          //       style={[
+          //         styles.itemText,
+          //         checkedItems[item.id] && styles.checkedText,
+          //       ]}
+          //     >
+          //       {item.text}
+          //     </Text>
+          //   </View>
+          // )}
           renderItem={({ item }) => (
-            <View style={styles.itemRow}>
-              <Checkbox
-                status={checkedItems[item.id] ? "checked" : "unchecked"}
-                disabled={user.email !== ADMIN_EMAIL}
-                onPress={() => toggleCheck(item)}
-              />
-              <Text
-                style={[
-                  styles.itemText,
-                  checkedItems[item.id] && styles.checkedText,
-                ]}
-              >
-                {item.text}
-              </Text>
-            </View>
+            <Pressable
+              onLongPress={() => {
+                if (user.email == ADMIN_EMAIL || user.email == group.user_email){
+                  console.log("presssssss")
+                  setDeleteItemId(item.id);
+                }
+              }}
+              android_ripple={{ color: "#eee" }}
+            >
+              <View style={styles.itemRow}>
+                <Checkbox
+                  status={checkedItems[item.id] ? "checked" : "unchecked"}
+                  disabled={user.email !== ADMIN_EMAIL}
+                  onPress={() => toggleCheck(item)}
+                />
+          
+                <Text
+                  style={[
+                    styles.itemText,
+                    checkedItems[item.id] && styles.checkedText,
+                  ]}
+                >
+                  {item.text}
+                </Text>
+              </View>
+            </Pressable>
           )}
+          
         />
 
         {/* INPUT BAR */}
         {!!isMe(group.user_email) && (
           <View style={styles.inputBar}>
-          <TextInput
-            mode="outlined"
-            placeholder="Add a new item..."
-            value={text}
-            onChangeText={setText}
-            style={styles.input}
-            outlineColor="#e0e0e0"
-            activeOutlineColor="#4CAF50"
-            dense
-          />
-        
-          <Button
-            mode="contained"
-            onPress={async () => {
-              if (!text.trim()) return;
-              await createItem(text);
-              setText("");
-              load();
-            }}
-            style={styles.addBtn}
-            contentStyle={{ height: 44 }}
-          >
-            Add
-          </Button>
-        </View>
-        
+            <TextInput
+              mode="outlined"
+              placeholder="Add a new item..."
+              value={text}
+              onChangeText={setText}
+              style={styles.input}
+              outlineColor="#e0e0e0"
+              activeOutlineColor="#4CAF50"
+              dense
+            />
+
+            <Button
+              mode="contained"
+              onPress={async () => {
+                if (!text.trim()) return;
+                await createItem(text);
+                setText("");
+                load();
+              }}
+              style={styles.addBtn}
+              contentStyle={{ height: 44 }}
+            >
+              Add
+            </Button>
+          </View>
+
         )}
       </View>
+      <Portal>
+        <Dialog
+          visible={!!deleteItemId}
+          onDismiss={() => setDeleteItemId(null)}
+        >
+          <Dialog.Title>Delete item?</Dialog.Title>
+
+          <Dialog.Content>
+            <Text>
+              This action cannot be undone.
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Actions>
+            <Button onPress={() => setDeleteItemId(null)}>
+              Cancel
+            </Button>
+
+            <Button
+              textColor="red"
+              onPress={confirmDelete}
+            >
+              Delete
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
     </KeyboardAvoidingView>
   );
 }
