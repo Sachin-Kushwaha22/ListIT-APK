@@ -18,9 +18,9 @@ export default function GroupDetailsScreen({ route }) {
   const [loadingItems, setLoadingItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
-
+  const ADMIN_EMAIL = "sachin8n@gmail.com";
   const toggleCheck = async (item) => {
-    if (!isMe(group.user_email)) return;
+    if (user.email !== ADMIN_EMAIL) return;
 
     const prevChecked = checkedItems[item.id];
     const newChecked = !prevChecked;
@@ -110,7 +110,7 @@ export default function GroupDetailsScreen({ route }) {
             <View style={styles.itemRow}>
               <Checkbox
                 status={checkedItems[item.id] ? "checked" : "unchecked"}
-                disabled={!isMe(group.user_email)}
+                disabled={user.email !== ADMIN_EMAIL}
                 onPress={() => toggleCheck(item)}
               />
               <Text
