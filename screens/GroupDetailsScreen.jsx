@@ -1,4 +1,4 @@
-import { View, FlatList, Image, StyleSheet, KeyboardAvoidingView, Platform, Pressable  } from "react-native";
+import { View, FlatList, Image, StyleSheet, KeyboardAvoidingView, Platform, Pressable } from "react-native";
 import { Text, Checkbox, TextInput, Button, Dialog, Portal } from "react-native-paper";
 import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
@@ -21,7 +21,7 @@ export default function GroupDetailsScreen({ route }) {
   const [deleteItemId, setDeleteItemId] = useState(null);
   const ADMIN_EMAIL = "sachin8n@gmail.com";
 
-    useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       load();
     }, [])
@@ -97,7 +97,7 @@ export default function GroupDetailsScreen({ route }) {
       setDeleteItemId(null);
     }
   };
-  
+
 
 
   return (
@@ -115,6 +115,17 @@ export default function GroupDetailsScreen({ route }) {
           />
           <Text style={styles.username}>{group.user_name}</Text>
         </View>
+
+        {(user.email == ADMIN_EMAIL || user.email == group.user_email) && ( items?.length > 0) && (
+          <View>
+            <Text style={styles.hintText}>
+            Long press on an item to delete.
+          </Text>
+            <Text style={styles.hintText2}>
+            Admin will mark the task as completed.
+          </Text>
+          </View>
+        )}
 
         {/* ITEMS LIST */}
         <FlatList
@@ -141,7 +152,7 @@ export default function GroupDetailsScreen({ route }) {
           renderItem={({ item }) => (
             <Pressable
               onLongPress={() => {
-                if (user.email == ADMIN_EMAIL || user.email == group.user_email){
+                if (user.email == ADMIN_EMAIL || user.email == group.user_email) {
                   console.log("presssssss")
                   setDeleteItemId(item.id);
                 }
@@ -154,7 +165,7 @@ export default function GroupDetailsScreen({ route }) {
                   disabled={user.email !== ADMIN_EMAIL}
                   onPress={() => toggleCheck(item)}
                 />
-          
+
                 <Text
                   style={[
                     styles.itemText,
@@ -166,7 +177,7 @@ export default function GroupDetailsScreen({ route }) {
               </View>
             </Pressable>
           )}
-          
+
         />
 
         {/* INPUT BAR */}
@@ -310,4 +321,23 @@ const styles = StyleSheet.create({
   addBtn: {
     borderRadius: 5,
   },
+
+  hintText: {
+    fontSize: 12,
+    color: "#888",
+    paddingHorizontal: 10,
+    paddingBottom: 0,
+    paddingTop: 8,
+    textAlign:'center'
+  },
+  
+  hintText2: {
+    fontSize: 12,
+    color: "#888",
+    paddingHorizontal: 10,
+    paddingBottom: 0,
+    paddingTop: 1,
+    textAlign:'center'
+  }
+  
 });
